@@ -1,0 +1,8 @@
+{
+  "name": "aleph-naught2tog-ts_without_dependencies",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Pierre Raoul <p.m.raoul@gmail.com>",
+  "license": "MIT",
+  "private": true
+}
