@@ -6,8 +6,9 @@ import {
     createSourceFile,
 } from 'typescript';
 import format from 'prettier-eslint';
-import { accessSync, constants, openSync, readFileSync, writeFileSync } from 'fs';
+import { accessSync, constants, existsSync, lstatSync, openSync, readdirSync, readFileSync, writeFileSync } from 'graceful-fs';
 import { argv, exit } from 'process';
+import { join } from 'path';
 
 // The tag can't be a comment itself, as it'd be removed...
 const NEWLINE_INNER_TAG = ' ### TEMP TAG FOR NEWLINE ### ';
@@ -33,15 +34,22 @@ const options = {
     fallbackPrettierOptions: {}
 };
 
-const srcFilePath = argv[2] && argv[2].trim() ? argv[2].trim() : '';
-const destFilePath = argv[3] && argv[3].trim() ? argv[3].trim() : srcFilePath + '.purged';
+const srcPath = argv[2] && argv[2].trim() ? argv[2].trim() : '';
+const destPath = argv[3] && argv[3].trim() ? argv[3].trim() : srcPath;
+const pattern = argv[4]  && argv[4].trim() ? argv[4].trim() : null;
+const replaceValue = argv[5]  && argv[5].trim() ? argv[5].trim() : '';
 
-if (!srcFilePath) {
-    console.log('Strip commments: a file path must be provided');
-    exit(1);
+// if needed, will create a dest file path from the source file path
+const transform = (path: string) => {
+    if(!pattern && !replaceValue) {
+        return path;
+    }
+    if(!pattern) { // replaceValue is a suffix
+        return path + pattern;
+    }
+    const re = new RegExp(pattern);
+    return path.replace(re, replaceValue);
 }
-
-console.log('Strip commments from: ', srcFilePath)
 
 function preserveNewlines (data: string) {
     return data.replace(/\n\n/g, '\n' + NEWLINE_TAG + '\n');
@@ -51,7 +59,7 @@ function restoreNewlines (data: string) {
     return data.replace(new RegExp(NEWLINE_SEARCH, 'g'), '');
 }
 
-export function cleaner (srcFilePath: string, destFilePath: string) {
+function fileCleaner (srcFilePath: string, destFilePath: string) {
     accessSync(srcFilePath, constants.F_OK);
 
     const printerOptions = { newLine: NewLineKind.LineFeed, removeComments: true };
@@ -70,9 +78,34 @@ export function cleaner (srcFilePath: string, destFilePath: string) {
     return 'Comments removed';
 };
 
+// TODO: if srcPath is a folder, walk recursively in the tree under it
+function cleaner(srcPath: string, destPath: string, transform: (p: string) => string) {
+    if (!srcPath) {
+        throw new Error('a source must be provided');
+    }
+    if (!destPath) {
+        console.log('Strip commments: no destination path provided, source path will be used');
+    }
+     
+    const isSrcDir = existsSync(srcPath) && lstatSync(srcPath).isDirectory();
+    const isDestDir = existsSync(destPath) && lstatSync(destPath).isDirectory(); 
+    
+    if (!isDestDir && isSrcDir && readdirSync(srcPath).length > 1) {
+        throw new Error('destination is ambiguous, ie multi source files for only one destination file')
+    }
+    
+    const srcPathList = isSrcDir ? readdirSync(srcPath): [srcPath];
+
+    srcPathList.forEach(src => {
+        const dest = isDestDir ? join(destPath, transform(src)): destPath;
+        fileCleaner(join(srcPath, src), dest);
+    });
+    return 'Comments removed';
+}
+
 try {
-    console.log(cleaner(srcFilePath, destFilePath));
+    console.log(cleaner(srcPath, destPath, transform));
 } catch (error) {
-    console.log('Unable to remove comments :', error);
+    console.log('Strip commments: ', error);
     exit(1);
 }

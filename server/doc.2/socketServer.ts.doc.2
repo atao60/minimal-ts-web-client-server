@@ -1,0 +1,34 @@
+import WebSocket, { Server } from 'ws';
+
+export function sendToSocketClients(socketServer: Server, data: {}) {
+  const stringifiedData = JSON.stringify(data);
+
+  socketServer.clients.forEach((client: WebSocket) => {
+    client.send(stringifiedData, console.error);
+  });
+};
+
+/**
+ * Used for creating and initializing a socket connection that we then use for
+ * hot-reloading the site.
+ *
+ * @param {number} port the port the socket should receive clients on
+ *
+ * @returns the running, initialized socket connection
+ *
+ * @requires [ws](https://github.com/websockets/ws/blob/HEAD/doc/ws.md) (external link)
+ */
+export function getSocketServer(port: number): Server {
+  const socketServer = new Server({ port: port, clientTracking: true });
+
+  socketServer.on('connection', (client: WebSocket) => {
+    console.log(`[ws] Client connected.`);
+
+    client.on('close', () => {
+      console.log(`[ws] Client disconnected`);
+      client.terminate();
+    });
+  });
+
+  return socketServer;
+}

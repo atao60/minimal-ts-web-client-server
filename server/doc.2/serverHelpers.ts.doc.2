@@ -1,0 +1,96 @@
+import { IncomingMessage } from 'http'; // @@@ docs: https://nodejs.org/api/http.html
+import { parse as urlParse } from 'url'; // @@@ docs: https://nodejs.org/api/url.html
+import { parse as pathParse } from 'path'; // @@@ docs: https://nodejs.org/api/path.html
+
+/**
+ * This is the 'root' of the server; it is what all other paths are relative to.
+ *
+ * @constant {string} SERVER_ROOT_FOLDER
+ */
+export const WEB_ROOT_DIR = './public';
+export const SRC_DIR = './src';
+
+const RUNNING_FILE_EXT = '.js';
+
+/*
+ * Used to determine the correct content-type to serve the response with.
+ *
+ * @param {string} extension the extension of the file that was originally requested
+ * @returns {string} the desired file type
+ */
+const determineContentType = (extension: string) => {
+    const map: {
+        [key: string]: string;
+    } = {
+        css: 'text/css',
+        js: 'text/javascript',
+        html: 'text/html',
+        plain: 'text/plain'
+    } as const;
+
+    const index = extension in map ? extension : 'plain';
+    return map[index];
+};
+
+/**
+ * Used to determine the correct content-type of a resource
+ *
+ * @param {string} filePath
+ *
+ * @requires [path](https://nodejs.org/api/path.html)
+ */
+export const fetchContentType = (filePath: string) => {
+    // @@@ `.replace(".", "")` removes the `.`, by replacing it with nothing (an empty string)
+    const extension = pathParse(filePath).ext.replace('.', '');
+    const contentType = determineContentType(extension);
+    return contentType;
+}
+
+/*
+ * Used for determining whether we should serve a Javascript file in response.
+ *
+ * Because of the fact that module names don't have the extension included in
+ * Typescript, we can use the fact that `type="module"` on an HTML `script` element
+ * means the browser will make a specific kind of HTTP request.
+ *
+ * When the browser requests a module, it includes the file that made the
+ * request -- if your `index.js` file has an import like
+ * `import { aModule } ...`, the server will receive a request from the browser
+ * with a `referer` header of something like `index.js`. Other requests don't
+ * ordinarily include this header, which is why we can use it here to figure
+ * out whether a module has been requested.
+ *
+ * (FYI: `referer` _really_ is the correct spelling, here.)
+ *
+ * @param {http.IncomingMessage} request the original request from the browser
+ *
+ * @returns {boolean} whether the file being requested is a JS module
+ */
+const isModuleRequest = (request: IncomingMessage) => {
+    const referer = request.headers.referer; // @@@ `referer` is the header that represents who made the request
+    const result = referer ? referer.endsWith(RUNNING_FILE_EXT) : false;
+    return result;
+};
+
+/**
+ * Used to figure out the actual path -- on the _server_ (aka, your computer!) --
+ * to the file we want to send as a response.
+ *
+ * @param {http.IncomingMessage} request
+ *
+ * @requires [url](https://nodejs.org/api/url.html)
+ */export const fetchFilePathOnServer = (request: IncomingMessage) => {
+    const requestUrl = request.url as string;
+    const parsedUrl = urlParse(requestUrl);
+
+    const suffix = (request => {
+        if (isModuleRequest(request)) {
+            return RUNNING_FILE_EXT;
+        }
+        if (parsedUrl.pathname === '/') { // @@@ This ensures that navigating to "localhost:PORT" just loades the homepage
+            return 'index.html';
+        }
+        return '';
+    })(request);
+    return `${WEB_ROOT_DIR}${parsedUrl.pathname}${suffix}`;
+};

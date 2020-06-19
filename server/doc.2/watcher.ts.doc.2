@@ -1,0 +1,38 @@
+/**
+ * When a directory is "watched", that means we have opened a line of
+ * communication and are listening for certain events. In this case, we are
+ * listening for events that get emitted (sent out) when the files in the
+ * `folder` provided change.
+ *
+ * The `{ recursive: true }` option given to the `fs.watch` function means that
+ * we want the watcher to notify us of any file changes in the folder we gave
+ * it, _and_ in every other folder inside the folder we gave it. If we didn't
+ * provide that option, we would only be notified of changes to the files in
+ * that top folder -- if we added a new folder to that folder, and started
+ * changing files there, we'd never hear about it.
+ *
+ * In fact [chokidar](https://github.com/paulmillr/chokidar) is used in place 
+ * of [fs](https://nodejs.org/api/fs.html), to get cross-platform recursive watching of file trees.
+ *
+ * @param {string} folder the folder to watch for changes
+ *
+ * @returns {FSWatcher} the file watcher for that folder
+ *
+ * @requires [chokidar](https://github.com/paulmillr/chokidar) (external link)
+ */
+import { FSWatcher, WatchOptions, watch } from 'chokidar';
+
+export function getWatcher (folder: string, options: {[key: string]: any} = {}): FSWatcher {
+  const fullOptions = {
+    ...options,
+    recursive: true
+  } as WatchOptions;
+
+  const watcher = watch(folder, fullOptions);
+
+  watcher.on('error', error => {
+    console.error(`Code watcher on ${folder}, error: `, error);
+  });
+
+  return watcher;
+}
