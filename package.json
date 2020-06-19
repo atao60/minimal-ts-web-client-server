@@ -26,6 +26,7 @@
   "devDependencies": {
     "@types/node": "^14.0.13",
     "core-js": "^3.6.5",
+    "cpy-cli": "^3.1.1",
     "prettier-eslint": "^11.0.0",
     "ts-node": "^8.10.2",
     "typescript": "^3.9.5"
@@ -33,6 +34,7 @@
   "scripts": {
     "redo_server_file": "ts-node --files -P tools/tsconfig.json tools/strip-comments.ts server/index.doc.ts server/index.ts",
     "serve": "node proxy",
-    "build:server": "tsc -p server"
+    "build:server": "tsc -p server",
+    "build:site": "tsc && cd src && cpy --parents **/*.html **/*.css ../public"
   }
 }
