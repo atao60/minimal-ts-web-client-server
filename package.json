@@ -1,8 +1,26 @@
 {
-  "name": "aleph-naught2tog-ts_without_dependencies",
-  "version": "1.0.0",
-  "main": "index.js",
-  "author": "Pierre Raoul <p.m.raoul@gmail.com>",
+  "name": "minimal-ts-web-client-server",
+  "version": "0.1.0",
+  "author": "Pierre Raoul <atao60.dev@gmail.com>",
   "license": "MIT",
-  "private": true
+  "private": true,
+  "description": "Create from scratch with TS a minimalistic web app and its server",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/atao60/minimal-ts-web-client-server.git"
+  },
+  "bugs": "https://github.com/atao60/minimal-ts-web-client-server/issues",
+  "homepage": "https://github.com/atao60/minimal-ts-web-client-server#readme",
+  "keywords": [
+    "minimalist",
+    "hotload",
+    "typescript",
+    "browser",
+    "server",
+    "websocket"
+  ],
+  "engines": {
+    "node": ">=12.0.0",
+    "yarn": ">=1.13.0"
+  }
 }
