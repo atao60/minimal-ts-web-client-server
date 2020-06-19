@@ -31,6 +31,8 @@
     "typescript": "^3.9.5"
   },
   "scripts": {
-    "redo_server_file": "ts-node --files -P tools/tsconfig.json tools/strip-comments.ts server/index.doc.ts server/index.ts"
+    "redo_server_file": "ts-node --files -P tools/tsconfig.json tools/strip-comments.ts server/index.doc.ts server/index.ts",
+    "serve": "node proxy",
+    "build:server": "tsc -p server"
   }
 }
