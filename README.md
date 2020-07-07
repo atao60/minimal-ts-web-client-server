@@ -1,39 +1,30 @@
-<h1 align="center">Welcome to minimal-ts-web-client-server 👋</h1>
-<p>
-  <img alt="Version" src="https://img.shields.io/badge/version-0.1.0-blue.svg?cacheSeconds=2592000" />
-  <img src="https://img.shields.io/badge/node-%3E%3D12.0.0-blue.svg" />
-  <img src="https://img.shields.io/badge/yarn-%3E%3D1.13.0-blue.svg" />
-  <a href="https://github.com/atao60/minimal-ts-web-client-server#readme" target="_blank">
-    <img alt="Documentation" src="https://img.shields.io/badge/documentation-yes-brightgreen.svg" />
-  </a>
-  <a href="https://github.com/atao60/minimal-ts-web-client-server/graphs/commit-activity" target="_blank">
-    <img alt="Maintenance" src="https://img.shields.io/badge/Maintained%3F-yes-green.svg" />
-  </a>
-  <a href="https://github.com/atao60/minimal-ts-web-client-server/blob/master/LICENSE" target="_blank">
-    <img alt="License: MIT" src="https://img.shields.io/github/license/atao60/minimal-ts-web-client-server" />
-  </a>
-</p>
+Welcome to minimal-ts-web-client-server 👋
+===
+[![Github Version](https://img.shields.io/github/package-json/v/atao60/minimal-ts-web-client-server?label=github&color=#0366d6)](https://github.com/atao60/minimal-ts-web-client-server)
+[![Github Version](https://img.shields.io/github/issues/atao60/minimal-ts-web-client-server)](https://github.com/atao60/minimal-ts-web-client-server/issue)
+[![License: MIT](https://img.shields.io/github/license/atao60/minimal-ts-web-client-server)](https://github.com/atao60/minimal-ts-web-client-server/blob/master/LICENSE)
 
-<span style="font-size:3em;">🏗</span>A minimalistic web application and its server, from scratch, both of them with [TS](https://www.typescriptlang.org/). 
+<span style="font-size:3em;">🏗</span>A minimalistic web application and its server both of them with [TS](https://www.typescriptlang.org/). 
 
 ## 💡 Rational
 
 Using only [Typescript](https://www.typescriptlang.org/), create from scratch:
 - a web application, without any dependency,
-- a web server with as few dependencies as possible,  
+- a web server with as few dependencies as possible.
 
-and a very basic hot-reloading.
-
-The web server with hot-reloading requires only:
-- [Node.js' http](https://nodejs.org/api/http.html), 
-- [ws](https://www.npmjs.com/package/ws), a WebSocket client and server implementation,
-- [chokidar](https://www.npmjs.com/package/chokidar), to watch code files (see below).
+The web server provides very basic services for:
+- bare module import resolving using [import maps](https://github.com/WICG/import-maps) with:
+  - [es-module-shims](https://www.npmjs.com/package/es-module-shims),
+- hot-reloading with:
+  - [Node.js' http](https://nodejs.org/api/http.html), 
+  - [ws](https://www.npmjs.com/package/ws), a WebSocket client and server implementation,
+  - [chokidar](https://www.npmjs.com/package/chokidar), to watch code files (see below).
 
 No [Webpack](https://webpack.js.org/), [Bazel](https://bazel.build/) or any other build manager.
 
 No test. No lint.
 
-Some convenient packages ([concurrently](https://www.npmjs.com/package/concurrently), [cpy-cli](https://www.npmjs.com/package/cpy-cli), ...) are enough:
+Some more convenient packages ([concurrently](https://www.npmjs.com/package/concurrently), [cpy-cli](https://www.npmjs.com/package/cpy-cli), ...) are enough:
 - to manage the files,
 - to launch the application and open it on a browser.
 
@@ -75,7 +66,7 @@ Then <kbd>Ctrl</kbd>+<kbd>c</kbd> to shut down the server.
 
 ## 🎹 Some explanation
 
-As long as an html page doesn't need to download anything after its initial loading, there is no need to work with a server. But with hot reloading, it's needed.
+As long as an html page doesn't need to download anything after its initial loading, there is no need to work with a server. But with hot reloading, it's required.
 
 All the source are under folder `src` and the generated ones put under `public`. Even if no build manager is used, some tasks must be done:
 - delete the folder `public`,
