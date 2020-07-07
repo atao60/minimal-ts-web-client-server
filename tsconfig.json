@@ -15,8 +15,16 @@
   "compilerOptions": {
     //    Other compiler settings go here
     "strict": true,
-    // "importHelpers": true,  // doesn't work without bare module resolving
+    "baseUrl": ".",
+    "paths": {
+      // "tslib": ["./node_modules/tslib/tslib.js"]
+      "tslib": ["./node_modules/tslib/tslib.d.ts"]
+    },
+    // "noImplicitAny": false,  // no more needed with 'import Maps', see package 
+    "importHelpers": true,  // doesn't work without bare module resolving
     "experimentalDecorators": true,
+    "lib": ["DOM", "ESNext"],
+    // "typeRoots": ["node_modules/@types"],
     
     // -------------------------------------------------------------------------
     //    if you're adding your own, add them BEFORE the ABOVE dotted line ^^^
@@ -32,6 +40,6 @@
     // this is where you want the compiler to start if you want your compiled
     //    directory structure to match your source (you probably do)
     "rootDir": "./src",
-    "target": "es5",
+    "target": "es5"
   }
 }

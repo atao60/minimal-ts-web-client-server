@@ -50,6 +50,11 @@
     "start": "yarn clean && yarn build && concurrently \"yarn serve\" \"yarn browser:open\" ",
     "serve:dev": "cross-env TS_NODE_PROJECT=\"./server/tsconfig.json\" node --inspect=5858 -r ts-node/register ./server/index.ts",
     "start:dev": "yarn clean && yarn build:site && concurrently \"yarn serve:dev\" \"yarn browser:open\" ",
+    "@comment redo-server": "Generate ts files without comments",
     "redo:server": "ts-node --files -P tools/tsconfig.json tools/strip-comments.ts server/doc.2 server '\\.doc\\.2' "
+  },
+  "dependencies": {
+    "es-module-shims": "^0.4.7",
+    "tslib": "^2.0.0"
   }
 }

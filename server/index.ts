@@ -34,7 +34,8 @@ const requestHandler = (request: IncomingMessage, response: ServerResponse) => {
       response.statusCode = 500;
       response.end('There was an error getting the request file.');
     } else {
-      response.setHeader('Content-Type', fetchContentType(filePath));
+      const contentType = fetchContentType(filePath);
+      response.setHeader('Content-Type', contentType);
       response.end(fileData);
     }
   });

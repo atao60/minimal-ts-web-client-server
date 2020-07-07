@@ -1,50 +1,63 @@
 import { IncomingMessage } from 'http';
 import { parse as urlParse } from 'url';
-import { parse as pathParse } from 'path';
+import { join, parse as pathParse } from 'path';
+import { existsSync } from 'fs';
 
 export const WEB_ROOT_DIR = './public';
 export const SRC_DIR = './src';
 
+const NODE_MODULES_DIR = './node_modules';
 const RUNNING_FILE_EXT = '.js';
 
-const determineContentType = (extension: string) => {
-  const map: {
-    [key: string]: string;
-  } = {
+const defaultContentType = 'text/plain';
+const contentTypeMap: { [key: string]: string; } = {
     css: 'text/css',
     js: 'text/javascript',
     html: 'text/html',
-    plain: 'text/plain'
-  } as const;
+    plain: defaultContentType
+} as const;
 
-  const index = extension in map ? extension : 'plain';
-  return map[index];
+const determineContentType = (extension: string, contentTypeByDefault = defaultContentType) => {
+    return contentTypeMap[extension] || contentTypeByDefault;
 };
 
-export const fetchContentType = (filePath: string) => {
-  const extension = pathParse(filePath).ext.replace('.', '');
-  const contentType = determineContentType(extension);
-  return contentType;
+// to be used only with full path, ie the file extension is known if any.
+export const fetchContentType = (filePath: string, contentTypeByDefault?: string) => {
+    const extension = pathParse(filePath).ext.replace('.', '');
+    const contentType = determineContentType(extension, contentTypeByDefault);
+    return contentType;
 };
 
-const isModuleRequest = (request: IncomingMessage) => {
-  const referer = request.headers.referer;
-  const result = referer ? referer.endsWith(RUNNING_FILE_EXT) : false;
-  return result;
-};
+export const fetchFilePathOnServer = (request: IncomingMessage): string => {
+    const requestUrl = request.url || '';
+    const parsedUrl = urlParse(requestUrl);
+    const pathname = parsedUrl.pathname || '';
 
-export const fetchFilePathOnServer = (request: IncomingMessage) => {
-  const requestUrl = request.url as string;
-  const parsedUrl = urlParse(requestUrl);
-
-  const suffix = (request => {
-    if (isModuleRequest(request)) {
-      return RUNNING_FILE_EXT;
+    const pathParts: string[] = [];
+    if (!/^\.{0,2}\//.exec(pathname)) { // bare module resolving
+        // add relative path of node_modules
+        // and if no file ext., add '.js' as such
+        pathParts.push(NODE_MODULES_DIR);
+        const hasNoFileExt = !fetchContentType(pathname, '');
+        const extension = hasNoFileExt ? RUNNING_FILE_EXT : '';
+        const longpath = pathname + extension;
+        pathParts.push(longpath);
     }
-    if (parsedUrl.pathname === '/') {
-      return 'index.html';
+    else if (pathname === '/') {
+        pathParts.push(WEB_ROOT_DIR)
+        pathParts.push('index.html');
     }
-    return '';
-  })(request);
-  return `${WEB_ROOT_DIR}${parsedUrl.pathname}${suffix}`;
-};
+    else if (/^\.{0,2}\/node_modules/.exec(pathname)) { // explicit node module
+        pathParts.push(pathname);
+    }
+    else  { // inner project module
+        // always relative to WEB_ROOT_DIR
+        // first search as it then if no file ext, with ext. '.js'
+        // filePathOnServerParts.push(WEB_ROOT_DIR)
+        const shortpath = join(WEB_ROOT_DIR, pathname);
+        const extension = existsSync(shortpath) ? '' : RUNNING_FILE_EXT;
+        const longpath = shortpath + extension;
+        pathParts.push(longpath);
+    }
+    return join('.', ...pathParts);
+}
