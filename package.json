@@ -38,7 +38,7 @@
     "ts-node": "^8.10.2",
     "typescript": "^3.9.5",
     "wait-on": "^5.0.1",
-    "ws": "^7.3.0"
+    "ws": "^7.4.6"
   },
   "scripts": {
     "serve": "node proxy",
